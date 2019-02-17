@@ -4,6 +4,7 @@ import com.github.adrmal.peka.vm.client.model.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.function.Function;
 
 public class Peka {
 
@@ -14,103 +15,121 @@ public class Peka {
     }
 
 	public static List<StopPoint> getStopPoints(String stopPointPattern) throws IOException {
-		PekaRequest request = PekaRequestBuilder.builder()
-				.withMethod("getStopPoints")
-				.withParam("pattern", stopPointPattern)
-				.build();
-
-		String json = tryExecute(request);
-		return PekaJsonParser.parseStopPoints(json);
+		return executeAndParseRequest(
+				"getStopPoints",
+				"pattern",
+				stopPointPattern,
+				PekaJsonParser::parseStopPoints
+		);
 	}
 
 	public static List<Bollard> getBollardsByStopPoint(String stopPointName) throws IOException {
-		PekaRequest request = PekaRequestBuilder.builder()
-				.withMethod("getBollardsByStopPoint")
-				.withParam("name", stopPointName)
-				.build();
-
-		String json = tryExecute(request);
-		return PekaJsonParser.parseBollards(json);
+		return executeAndParseRequest(
+				"getBollardsByStopPoint",
+				"name",
+				stopPointName,
+				PekaJsonParser::parseBollards
+		);
 	}
 
 	public static List<Bollard> getBollardsByStreet(String streetName) throws IOException {
-		PekaRequest request = PekaRequestBuilder.builder()
-				.withMethod("getBollardsByStreet")
-				.withParam("name", streetName)
-				.build();
-
-		String json = tryExecute(request);
-		return PekaJsonParser.parseBollards(json);
+		return executeAndParseRequest(
+				"getBollardsByStreet",
+				"name",
+				streetName,
+				PekaJsonParser::parseBollards
+		);
 	}
 
 	public static List<DirectionWithBollards> getDirectionsWithBollardsByLine(String lineNumber) throws IOException {
-		PekaRequest request = PekaRequestBuilder.builder()
-				.withMethod("getBollardsByLine")
-				.withParam("name", lineNumber)
-				.build();
-
-		String json = tryExecute(request);
-		return PekaJsonParser.parseDirectionsWithBollards(json);
+		return executeAndParseRequest(
+				"getBollardsByLine",
+				"name",
+				lineNumber,
+				PekaJsonParser::parseDirectionsWithBollards
+		);
 	}
 
 	public static List<Line> getLines(String linePattern) throws IOException {
-		PekaRequest request = PekaRequestBuilder.builder()
-				.withMethod("getLines")
-				.withParam("pattern", linePattern)
-				.build();
-
-		String json = tryExecute(request);
-		return PekaJsonParser.parseLines(json);
+		return executeAndParseRequest(
+				"getLines",
+				"pattern",
+				linePattern,
+				PekaJsonParser::parseLines
+		);
 	}
 
 	public static List<Street> getStreets(String streetPattern) throws IOException {
-		PekaRequest request = PekaRequestBuilder.builder()
-				.withMethod("getStreets")
-				.withParam("pattern", streetPattern)
-				.build();
-
-		String json = tryExecute(request);
-		return PekaJsonParser.parseStreets(json);
+		return executeAndParseRequest(
+				"getStreets",
+				"pattern",
+				streetPattern,
+				PekaJsonParser::parseStreets
+		);
 	}
 
 	public static List<DepartureTime> getTimesByBollard(String bollardTag) throws IOException {
-		PekaRequest request = PekaRequestBuilder.builder()
-				.withMethod("getTimes")
-				.withParam("symbol", bollardTag)
-				.build();
-
-		String json = tryExecute(request);
-		return PekaJsonParser.parseDepartureTimesForOneBollard(json);
+		return executeAndParseRequest(
+				"getTimes",
+				"symbol",
+				bollardTag,
+				PekaJsonParser::parseDepartureTimesForOneBollard
+		);
 	}
 
 	public static List<DepartureTime> getTimesByStopPoint(String stopPointName) throws IOException {
-		PekaRequest request = PekaRequestBuilder.builder()
-				.withMethod("getTimesForAllBollards")
-				.withParam("name", stopPointName)
-				.build();
-
-		String json = tryExecute(request);
-		return PekaJsonParser.parseDepartureTimesForManyBollards(json);
+		return executeAndParseRequest(
+				"getTimesForAllBollards",
+				"name",
+				stopPointName,
+				PekaJsonParser::parseDepartureTimesForManyBollards
+		);
 	}
 
 	public static long getServerTime() throws IOException {
-		PekaRequest request = PekaRequestBuilder.builder()
-				.withMethod("getServerTime")
-				.withEmptyParam()
-				.build();
-
-		String json = tryExecute(request);
-		return PekaJsonParser.parseServerTime(json);
+		return executeAndParseRequest(
+				"getServerTime",
+				PekaJsonParser::parseServerTime
+		);
 	}
 
 	public static List<Message> getMessagesForBollard(String bollardTag) throws IOException {
-		PekaRequest request = PekaRequestBuilder.builder()
-				.withMethod("findMessagesForBollard")
-				.withParam("symbol", bollardTag)
-				.build();
+		return executeAndParseRequest(
+				"findMessagesForBollard",
+				"symbol",
+				bollardTag,
+				PekaJsonParser::parseMessages
+		);
+	}
 
+	private static <R> R executeAndParseRequest(String methodName, String paramName, String paramValue, Function<String, R> jsonParseFunction) throws IOException {
+		if(paramName != null && paramValue == null) {
+			throw new IllegalArgumentException("Passed argument cannot be null.");
+		}
+
+		PekaRequest request = buildRequest(methodName, paramName, paramValue);
 		String json = tryExecute(request);
-		return PekaJsonParser.parseMessages(json);
+		return tryParse(json, jsonParseFunction);
+	}
+
+	private static <R> R executeAndParseRequest(String methodName, Function<String, R> jsonParseFunction) throws IOException {
+		return executeAndParseRequest(methodName, null, null, jsonParseFunction);
+	}
+
+	private static PekaRequest buildRequest(String methodName, String paramName, String paramValue) {
+		PekaRequestBuilder requestBuilder = PekaRequestBuilder.builder();
+		if(paramName == null) {
+			return requestBuilder
+					.withMethod(methodName)
+					.withEmptyParam()
+					.build();
+		}
+		else {
+			return requestBuilder
+					.withMethod(methodName)
+					.withParam(paramName, paramValue)
+					.build();
+		}
 	}
 
 	private static String tryExecute(PekaRequest request) throws IOException {
@@ -119,6 +138,15 @@ public class Peka {
 		}
 		catch(Exception e) {
 			throw new IOException("Internet connection error.");
+		}
+	}
+
+	private static <R> R tryParse(String json, Function<String, R> jsonParseFunction) {
+		try {
+			return jsonParseFunction.apply(json);
+		}
+		catch(Exception e) {
+			throw new IllegalArgumentException("Passed argument is incorrect.");
 		}
 	}
 

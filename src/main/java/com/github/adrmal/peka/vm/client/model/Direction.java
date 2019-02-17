@@ -8,16 +8,16 @@ public class Direction {
 
     private boolean returnVariant;
     @SerializedName("direction")
-    private String lineDirection;
+    private String lineFinalStop;
     private String lineName;
 
     public Direction() {
         // nop
     }
 
-    public Direction(boolean returnVariant, String lineDirection, String lineName) {
+    public Direction(boolean returnVariant, String lineFinalStop, String lineName) {
         this.returnVariant = returnVariant;
-        this.lineDirection = lineDirection;
+        this.lineFinalStop = lineFinalStop;
         this.lineName = lineName;
     }
 
@@ -25,8 +25,8 @@ public class Direction {
         return returnVariant;
     }
 
-    public String getLineDirection() {
-        return lineDirection;
+    public String getLineFinalStop() {
+        return lineFinalStop;
     }
 
     public String getLineName() {
@@ -37,8 +37,8 @@ public class Direction {
         this.returnVariant = returnVariant;
     }
 
-    public void setLineDirection(String lineDirection) {
-        this.lineDirection = lineDirection;
+    public void setLineFinalStop(String lineFinalStop) {
+        this.lineFinalStop = lineFinalStop;
     }
 
     public void setLineName(String lineName) {
@@ -51,20 +51,20 @@ public class Direction {
         if(o == null || getClass() != o.getClass()) return false;
         Direction direction = (Direction) o;
         return returnVariant == direction.returnVariant &&
-                Objects.equals(lineDirection, direction.lineDirection) &&
+                Objects.equals(lineFinalStop, direction.lineFinalStop) &&
                 Objects.equals(lineName, direction.lineName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(returnVariant, lineDirection, lineName);
+        return Objects.hash(returnVariant, lineFinalStop, lineName);
     }
 
     @Override
     public String toString() {
         return "Direction{" +
                 "returnVariant=" + returnVariant +
-                ", lineDirection='" + lineDirection + '\'' +
+                ", lineDirection='" + lineFinalStop + '\'' +
                 ", lineName='" + lineName + '\'' +
                 '}';
     }

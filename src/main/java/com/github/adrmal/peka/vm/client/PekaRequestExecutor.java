@@ -13,15 +13,13 @@ import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 class PekaRequestExecutor {
 
 	private static final Client REST_CLIENT = ResteasyClientBuilder.newClient();
-	private static final String BASE_URL = "http://www.peka.poznan.pl/vm/method.vm?ts=";
+	private static final String BASE_URL = "http://www.peka.poznan.pl/vm/method.vm";
 	private static final String METHOD_PARAM = "method";
 	private static final String P0_PARAM = "p0";
 	private static final String CHARSET_UTF8 = "; charset=UTF-8";
 
 	String execute(PekaRequest request) {
-		String url = BASE_URL + System.currentTimeMillis();
-
-		Response response = REST_CLIENT.target(url)
+		Response response = REST_CLIENT.target(BASE_URL)
 				.request()
 				.header(CONTENT_TYPE, APPLICATION_FORM_URLENCODED + CHARSET_UTF8)
 				.post(getRequestBody(request));
