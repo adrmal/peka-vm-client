@@ -64,7 +64,7 @@ public class Direction {
     public String toString() {
         return "Direction{" +
                 "returnVariant=" + returnVariant +
-                ", lineDirection='" + lineFinalStop + '\'' +
+                ", lineFinalStop='" + lineFinalStop + '\'' +
                 ", lineName='" + lineName + '\'' +
                 '}';
     }
